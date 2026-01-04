@@ -1,0 +1,7 @@
+{
+  "name": "Bico Fino - Gestão Financeira",
+  "description": "Sistema de controle financeiro completo para a loja Bico Fino, incluindo vendas, crediário, estoque e relatórios detalhados com identidade visual moderna e feminina.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

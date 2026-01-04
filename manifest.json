@@ -1,0 +1,27 @@
+
+{
+  "short_name": "Bico Fino",
+  "name": "Bico Fino - Gestão Financeira",
+  "description": "Sistema de controle financeiro completo para a loja Bico Fino.",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/fluency/192/000000/clothes.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/512/000000/clothes.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#4a1d35",
+  "background_color": "#f8f6f6",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "pt-BR"
+}
