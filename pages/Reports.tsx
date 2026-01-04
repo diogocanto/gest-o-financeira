@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { db } from '../services/supabaseMock';
 import { Sale, Expense, Installment, PaymentMethod } from '../types';
-import { 
+import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 
@@ -44,13 +44,18 @@ const Reports: React.FC = () => {
         })
         .reduce((acc, s) => acc + s.total_value, 0);
 
-      const installmentPaid = installments
-        .filter(i => {
-          if (i.status !== 'paid') return false;
-          const d = new Date(i.due_date); // Fallback para due_date
-          return d.getMonth() === month && d.getFullYear() === year;
-        })
-        .reduce((acc, i) => acc + i.value, 0);
+      const installmentPaid = installments.reduce((acc, i) => {
+        if (i.status === 'paid') {
+          const d = i.paid_at ? new Date(i.paid_at) : new Date(i.due_date);
+          if (d.getMonth() === month && d.getFullYear() === year) {
+            const sale = sales.find(s => s.id === i.sale_id);
+            if (sale) {
+              return acc + (sale.total_value / (sale.installments_count || 1));
+            }
+          }
+        }
+        return acc;
+      }, 0);
 
       return direct + installmentPaid;
     };
@@ -121,25 +126,25 @@ const Reports: React.FC = () => {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ComparisonCard 
-            title="Entrada Real (Cash Flow)" 
-            value={formatCurrency(monthlyReport.thisMonth.revenue)} 
-            lastValue={formatCurrency(monthlyReport.lastMonth.revenue)} 
+          <ComparisonCard
+            title="Entrada Real (Cash Flow)"
+            value={formatCurrency(monthlyReport.thisMonth.revenue)}
+            lastValue={formatCurrency(monthlyReport.lastMonth.revenue)}
             growth={monthlyReport.growth.revenue}
             color="text-emerald-600"
           />
-          <ComparisonCard 
-            title="Despesas Pagas" 
-            value={formatCurrency(monthlyReport.thisMonth.expenses)} 
-            lastValue={formatCurrency(monthlyReport.lastMonth.expenses)} 
+          <ComparisonCard
+            title="Despesas Pagas"
+            value={formatCurrency(monthlyReport.thisMonth.expenses)}
+            lastValue={formatCurrency(monthlyReport.lastMonth.expenses)}
             growth={monthlyReport.growth.expenses}
             reverse
             color="text-red-500"
           />
-          <ComparisonCard 
-            title="Lucro Real" 
-            value={formatCurrency(monthlyReport.thisMonth.profit)} 
-            lastValue={formatCurrency(monthlyReport.lastMonth.profit)} 
+          <ComparisonCard
+            title="Lucro Real"
+            value={formatCurrency(monthlyReport.thisMonth.profit)}
+            lastValue={formatCurrency(monthlyReport.lastMonth.profit)}
             growth={monthlyReport.growth.profit}
             color="text-[#4a1d96]"
           />
@@ -154,7 +159,7 @@ const Reports: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} />
                   <YAxis axisLine={false} tickLine={false} />
-                  <Tooltip cursor={{fill: '#fcfbfc'}} />
+                  <Tooltip cursor={{ fill: '#fcfbfc' }} />
                   <Legend iconType="circle" />
                   <Bar dataKey="Faturamento" fill="#ee2b6c" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Despesas" fill="#4a1d96" radius={[4, 4, 0, 0]} />
@@ -171,7 +176,7 @@ const Reports: React.FC = () => {
               <div className="p-4 bg-pink-50 rounded-xl border border-pink-100">
                 <p className="text-sm font-bold text-[#ee2b6c] mb-1 italic">Dica Bico Fino:</p>
                 <p className="text-xs text-[#89616f]">
-                  Os dados acima mostram o dinheiro que já caiu na conta. Lembre-se que você ainda tem 
+                  Os dados acima mostram o dinheiro que já caiu na conta. Lembre-se que você ainda tem
                   <strong> {formatCurrency(installments.filter(i => i.status !== 'paid').reduce((acc, i) => acc + i.value, 0))}</strong> a receber em parcelas futuras.
                 </p>
               </div>

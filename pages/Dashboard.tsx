@@ -53,9 +53,29 @@ const Dashboard: React.FC = () => {
       .reduce((acc, s) => acc + s.total_value, 0);
 
     // 2. Faturamento de Parcelas de Crediário PAGAS (Usando due_date como fallback já que paid_at inexiste)
-    const installmentIncome = installments
-      .filter(i => i.status === 'paid' && isCurrentMonth(i.due_date))
-      .reduce((acc, i) => acc + i.value, 0);
+    // 2. Faturamento de Parcelas de Crediário (Soma do valor original da parcela se paga, ou parcial)
+    // OBS: Como o sistema zera o i.value quando pago, precisamos reconstruir o valor original
+    const installmentIncome = installments.reduce((acc, i) => {
+      // Se não está pago e não tem diferença de valor, ignora
+      // Se status 'paid', consideramos recebido. 
+      // Se 'pending' mas com valor reduzido, seria parcial, mas sem log de data não sabemos QUANDO foi pago.
+      // Por simplificação: contamos apenas os 'paid' no mês do pagamento (ou vencimento se fallback)
+      
+      if (i.status === 'paid') {
+        const dateToCheck = i.paid_at ? new Date(i.paid_at) : new Date(i.due_date);
+        
+        // Verifica se o pagamento foi neste mês
+        if (dateToCheck.getMonth() === currentMonth && dateToCheck.getFullYear() === currentYear) {
+          const sale = sales.find(s => s.id === i.sale_id);
+          if (sale) {
+            // Reconstrói o valor original da parcela
+            const originalValue = sale.total_value / (sale.installments_count || 1);
+            return acc + originalValue;
+          }
+        }
+      }
+      return acc;
+    }, 0);
 
     const monthlyIncome = immediateIncome + installmentIncome;
 

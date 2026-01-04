@@ -30,7 +30,7 @@ export const db = {
   addAppUser: async (name: string, email: string) => {
     // Validação de limite local antes da tentativa de inserção
     const { count, error: countError } = await supabase.from('app_users').select('*', { count: 'exact', head: true });
-    
+
     if (countError) {
       if (countError.code === '42P01' || countError.message?.includes('schema cache')) {
         throw new Error("TABELA_AUSENTE");
@@ -171,7 +171,7 @@ export const db = {
         .eq('customer_id', triggerInst.customer_id)
         .eq('status', 'pending')
         .order('due_date', { ascending: true });
-      
+
       if (allPendingError) throw allPendingError;
 
       let remainingBalance = amountPaid;
@@ -201,13 +201,13 @@ export const db = {
         c_id: triggerInst.customer_id,
         c_amount: amountPaid
       });
-      
+
       if (rpcError) throw rpcError;
-      
-      return { 
-        success: true, 
-        installmentsProcessed, 
-        remainingUserCredit: Number(remainingBalance.toFixed(2)) 
+
+      return {
+        success: true,
+        installmentsProcessed,
+        remainingUserCredit: Number(remainingBalance.toFixed(2))
       };
     } catch (e) {
       console.error('Erro em payInstallment (Cascade):', e);
